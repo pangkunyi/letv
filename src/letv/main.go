@@ -4,12 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -24,13 +24,19 @@ type VCode struct {
 }
 
 func init() {
-	flag.StringVar(&id, "id", "", "video id")
-	flag.StringVar(&resolution, "res", "720p", "video resolution")
+	flag.StringVar(&id, "id", "", "video id, required")
+	flag.StringVar(&resolution, "res", "720p", "video resolution, optional")
 	flag.Parse()
 	if id == "" {
-		panic(errors.New("video should not be empty!"))
+		usage()
 	}
 	page = fmt.Sprintf(`http://www.letv.com/ptv/vplay/%s.html`, id)
+}
+
+func usage() {
+	fmt.Println("usage:")
+	flag.PrintDefaults()
+	os.Exit(1)
 }
 
 func main() {
