@@ -14,8 +14,9 @@ import (
 )
 
 var (
-	id         string
-	resolution string
+	id         = flag.String("id", "", "video id, required")
+	resolution = flag.String("res", "720p", "video resolution, optional")
+	all        = flag.Bool("a", false, "show all download link, optional")
 	page       string
 )
 
@@ -24,13 +25,11 @@ type VCode struct {
 }
 
 func init() {
-	flag.StringVar(&id, "id", "", "video id, required")
-	flag.StringVar(&resolution, "res", "720p", "video resolution, optional")
 	flag.Parse()
-	if id == "" {
+	if *id == "" {
 		usage()
 	}
-	page = fmt.Sprintf(`http://www.letv.com/ptv/vplay/%s.html`, id)
+	page = fmt.Sprintf(`http://www.letv.com/ptv/vplay/%s.html`, *id)
 }
 
 func usage() {
@@ -56,8 +55,19 @@ func main() {
 					if err = xml.Unmarshal(data, &vCodeObj); err == nil {
 						var playUrlMap map[string]interface{}
 						if err = json.Unmarshal([]byte(vCodeObj.Playurl), &playUrlMap); err == nil {
-							val := getVal(playUrlMap, "dispatch", resolution)
-							fmt.Printf("%s\n", realUrl(val[0].(string)))
+							if *all {
+								val := getVal(playUrlMap, "dispatch", *resolution)
+								fmt.Printf("dispatch\n%s\n", realUrl(val[0].(string)))
+								val = getVal(playUrlMap, "dispatchbak", *resolution)
+								fmt.Printf("dispatchbak\n%s\n", realUrl(val[0].(string)))
+								val = getVal(playUrlMap, "dispatchbak1", *resolution)
+								fmt.Printf("dispatchbak1\n%s\n", realUrl(val[0].(string)))
+								val = getVal(playUrlMap, "dispatchbak2", *resolution)
+								fmt.Printf("dispatchbak2\n%s\n", realUrl(val[0].(string)))
+							} else {
+								val := getVal(playUrlMap, "dispatch", *resolution)
+								fmt.Printf("%s\n", realUrl(val[0].(string)))
+							}
 						}
 					}
 				}
